@@ -9,6 +9,11 @@ import uvicorn
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
+from fastapi.responses import FileResponse
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return FileResponse("static/favicon.ico")
 
 def AlreadyExist(username):
     conn = DATABASE_CONNECT()
@@ -26,6 +31,9 @@ def login_form(request: Request):
 
 @app.post("/login", response_class=HTMLResponse)
 def login_post(request: Request, username: str = Form(...), password: str = Form(...)):
+    local_password = main(password)
+    print(local_password)
+    print(password)
     conn = DATABASE_CONNECT()
     cur = conn.cursor()
     cur.execute("SELECT * FROM passWRD WHERE UserLogin = ?", (username,))
