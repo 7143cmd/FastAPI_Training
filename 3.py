@@ -31,9 +31,7 @@ def login_form(request: Request):
 
 @app.post("/login", response_class=HTMLResponse)
 def login_post(request: Request, username: str = Form(...), password: str = Form(...)):
-    local_password = main(password)
-    print(local_password)
-    print(password)
+
     conn = DATABASE_CONNECT()
     cur = conn.cursor()
     cur.execute("SELECT * FROM passWRD WHERE UserLogin = ?", (username,))
