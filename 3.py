@@ -1,4 +1,4 @@
-from CacheProcess import main
+from CacheProcess import load_cipher, encrypt_password, decode_password
 from db import INSERT_INTO, DATABASE_CONNECT
 from fastapi import *
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -37,13 +37,27 @@ def login_post(request: Request, username: str = Form(...), password: str = Form
     cur.execute("SELECT * FROM passWRD WHERE UserLogin = ?", (username,))
     user = cur.fetchone()
     conn.close()
+  
 
-    if user is None or user['UserPassword'] != password:
+    if not user:
         return templates.TemplateResponse("login.html", {
             "request": request,
-            "error": "Неверный логин или пароль"
+            "error": "Incorrect login or password"
         })
-
+    try:
+        decrypted_password = decode_password(user["CachedPassword"])
+        if password != decrypted_password:
+            # print(decrypted_password)
+            # print(user)
+            # print(password)
+            raise ValueError("Wrong Password")
+            
+    except Exception:
+        return templates.TemplateResponse("login.html", {
+            "request": request,
+            "error": "Incorrect login or password"
+        })
+    
     response = RedirectResponse(url="/profile", status_code=302)
     response.set_cookie("username", username)
     return response
@@ -62,7 +76,7 @@ def register_post(request: Request, username: str = Form(...), password: str = F
             "error": "Пользователь уже существует"
         })
 
-    encrypted_password = main(password)
+    encrypted_password = encrypt_password(password)
     INSERT_INTO(UserPassword=password, CachedPassword=encrypted_password, UserLogin=username)
 
     response = RedirectResponse(url="/login", status_code=302)

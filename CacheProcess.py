@@ -1,18 +1,17 @@
 from cryptography.fernet import Fernet
 
 
-def main(secret_str):
+def load_cipher():
+    with open("key.key", 'rb') as f:
+        key = f.read()
+    return Fernet(key)
 
-    with open("key.key", 'rb') as key_file:
-        key = key_file.read()
+def encrypt_password(plain_password):
+    f = load_cipher()
+    return f.encrypt(plain_password.encode()).decode()
 
-    # print(key)
-
-    cipher = Fernet(key)
-
-    cached = cipher.encrypt(bytes(secret_str, encoding='utf-8'))
-    ready = cipher.decrypt(cached)
-    return cached.decode()
-
+def decode_password(encrypted_password):
+    f = load_cipher()
+    return f.decrypt(encrypted_password.encode()).decode()
 
 # print(main('007'))
