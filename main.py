@@ -73,7 +73,7 @@ def register_post(request: Request, username: str = Form(...), password: str = F
     if AlreadyExist(username):
         return templates.TemplateResponse("register.html", {
             "request": request,
-            "error": "Пользователь уже существует"
+            "error": "Пользователь уже существует"  
         })
 
     encrypted_password = encrypt_password(password)
@@ -87,9 +87,22 @@ def register_post(request: Request, username: str = Form(...), password: str = F
 @app.get("/profile", response_class=HTMLResponse)
 def profile(request: Request):
     username = request.cookies.get("username", "Гость")
+
+    
+    conn = DATABASE_CONNECT()
+    cur = conn.cursor()
+    cur.execute("SELECT TYPE FROM passWRD WHERE UserLogin = ?", (username,))
+    row = cur.fetchone()
+    conn.close()
+
+    is_admin = False
+    if row:
+        is_admin = bool(row["TYPE"])
+
     return templates.TemplateResponse("profile.html", {
         "request": request,
-        "username": username
+        "username": username,
+        "is_admin": is_admin
     })
 
 @app.get("/logout")
