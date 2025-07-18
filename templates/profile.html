@@ -1,16 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Profile</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
-    <div class="form-container">
-        <h2>Welcome, {{ username }}</h2>
-        <p>This is your profile page.</p>
-        <a href="/logout">Logout</a>
-    </div>
-</body>
-</html>
+{% extends "base.html" %}
+
+
+{% block title %}Profile{% endblock %}
+
+
+{% block content %}
+<div class="form-container">
+    <h2>Welcome, {{ username }}</h2>
+    <p>This is your profile page.</p>
+    <a href="/logout">Logout</a>
+</div>
+{% endblock %}
