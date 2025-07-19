@@ -105,6 +105,42 @@ def profile(request: Request):
         "is_admin": is_admin
     })
 
+@app.get("/admin", response_class=HTMLResponse)
+def admin_panel(request: Request):
+    username = request.cookies.get("username")
+    if not username:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    conn = DATABASE_CONNECT()
+    cur = conn.cursor()
+    cur.execute("SELECT TYPE FROM passWRD WHERE UserLogin = ?", (username,))
+    user = cur.fetchone()
+    
+    
+    if not user or not user["TYPE"]:
+        conn.close()
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    cur.execute("SELECT UserLogin, TYPE FROM passWRD")
+    users = cur.fetchall()
+    conn.close()
+
+    return templates.TemplateResponse("admin.html", {
+        "request": request,
+        "username": username,
+        "users": users
+    })
+
+@app.post("/admin/update", response_class=RedirectResponse)
+def update_admin_status(user_login: str = Form(...), new_type: int = Form(...)):
+    conn = DATABASE_CONNECT()
+    cur = conn.cursor()
+    cur.execute("UPDATE passWRD SET TYPE = ? WHERE UserLogin = ?", (new_type, user_login))
+    conn.commit()
+    conn.close()
+
+    return RedirectResponse(url="/admin", status_code=303)
+
 @app.get("/logout")
 def logout():
     response = RedirectResponse(url="/login", status_code=302)

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel - {{username}}{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Admin Panel</h2>
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>Username</th>
+            <th>Admin Status</th>
+            <th>Change Status</th>
+        </tr>
+        {% for user in users %}
+        <tr>
+            <td>{{ user["UserLogin"] }}</td>
+            <td>{{ "True" if user["TYPE"] else "False" }}</td>
+            <td>
+                <form action="/admin/update" method="post">
+                    <input type="hidden" name="user_login" value="{{ user['UserLogin'] }}">
+                    <select name="new_type">
+                        <option value="1" {% if user["TYPE"] %}selected{% endif %}>True</option>
+                        <option value="0" {% if not user["TYPE"] %}selected{% endif %}>False</option>
+                    </select>
+                    <button type="submit">Update</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}
